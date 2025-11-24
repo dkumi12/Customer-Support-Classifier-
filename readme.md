@@ -1,176 +1,175 @@
-# PulseDesk AI  
-An AI-powered customer support ticket classifier built with **DistilBERT**, **FastAPI**, **Docker**, and **AWS EC2**.  
-PulseDesk AI automatically analyzes customer messages and assigns them to the correct support category such as **Technical**, **Billing**, **Account**, or **General**.
+🚀 PulseDesk AI — Customer Support Ticket Classifier
 
-This improves support workflow efficiency, automates triage, and gives teams a fast, intelligent system for prioritizing issues.
+PulseDesk AI is a lightweight, production-ready machine-learning customer support classifier designed to automatically categorize incoming support messages into predefined ticket types.
 
----
+It features:
+	•	🔥 DistilBERT-based classifier (fine-tuned)
+	•	🌐 Modern responsive UI
+	•	🐳 Dockerized backend + frontend
+	•	☁️ Live deployment on AWS EC2
+	•	🔄 Fully automated CI/CD with GitHub Actions
+	•	⚡ 1-click deploys on every push to main
+	•	📈 Real-time prediction confidence
+	•	🗂️ Ticket history + clearing
 
-## 🌍 Live Demo
+Live Demo
+👉 http://23.23.72.235/
 
-### **PulseDesk AI UI**  
-**http://23.23.72.235/**  
-✓ Fully deployed on AWS EC2  
-✓ Dockerized UI and API  
-✓ Real-time classification  
+⸻
 
-### **API Endpoint**  
-http://23.23.72.235:8000/predict
+🧠 How PulseDesk AI Works
+	1.	User enters a customer message.
+	2.	The backend (/predict) loads the DistilBERT model and predicts:
+	•	Category (e.g., Account, Technical, Payments, etc.)
+	•	Confidence score
+	•	Raw probability distribution
+	3.	The UI displays the result + adds it to ticket history.
+	4.	You can clear history instantly.
 
-Send JSON such as:
+⸻
 
-```json
-{
-  "text": "I can't access my account"
-}
+🏗️ Project Architecture
+
+PulseDesk AI
+│
+├── Backend API  (FastAPI + DistilBERT)
+│     ├── Dockerfile
+│     ├── app/
+│     │    ├── main.py
+│     │    └── model loader + classifier
+│     └── model/ (ignored in repo)
+│
+├── Frontend UI (HTML/CSS/JS)
+│     ├── index.html
+│     ├── Dockerfile
+│     └── assets/
+│
+├── CI/CD (GitHub Actions)
+│     └── deploy.yml
+│
+└── AWS EC2 Deployment
+      ├── Backend → port 8000
+      └── UI → port 80
 
 
 ⸻
 
-✨ Key Features
+🐳 Running Locally (Docker)
 
-🤖 AI-Powered Classification
-	•	Built on fine-tuned DistilBERT
-	•	Predicts support categories with confidence scores
-	•	Handles noisy or incomplete messages
-
-⚡ FastAPI Backend
-	•	/predict endpoint
-	•	JSON in, structured prediction out
-	•	Highly optimized, production-ready
-
-🎨 Clean User Interface
-	•	Modern UI for testing classifications
-	•	Ticket history
-	•	Auto-scrolling + color-coded labels
-	•	“Clear history” feature
-
-🐳 Containerized Deployment
-	•	Dockerized API
-	•	Dockerized UI
-	•	Fast deploy, consistent environment
-
-☁️ Cloud Hosted
-	•	Deployed on AWS EC2
-	•	Publicly available
-	•	Ready for CI/CD (GitHub Actions → EC2)
-
-⸻
-
-🏗 Project Structure
-
-pulse-desk-ai/
-│── app.py                 # FastAPI backend
-│── requirements.txt       # Python dependencies
-│── Dockerfile             # Backend Docker file
-│── ui/                    # Frontend UI
-│── model/ (excluded)      # Model stored on EC2, not in repo
-│── README.md
-└── .gitignore
-
-
-⸻
-
-🔥 How It Works
-
-1️⃣ User enters a support message
-
-Example:
-
-“My login isn’t working”
-
-2️⃣ FastAPI receives the message
-
-Located at /predict
-
-3️⃣ DistilBERT model processes it
-
-Loaded directly from the EC2 filesystem (not GitHub)
-
-4️⃣ PulseDesk AI outputs
-
-{
-  "label": "account",
-  "confidence": 0.92
-}
-
-5️⃣ UI updates history
-	•	Shows prediction
-	•	Saves ticket temporarily
-	•	Allows clearing tickets with one click
-
-⸻
-
-🐳 Running Locally With Docker
-
-Build the backend
+1. Build API
 
 docker build -t pulsedesk-api .
+docker run -p 8000:8000 pulsedesk-api
 
-Run API
+2. Build UI
 
-docker run -d -p 8000:8000 --name pulsedesk pulsedesk-api
+docker build -t pulsedesk-ui ./ui
+docker run -p 80:80 pulsedesk-ui
 
-Run UI
 
-docker run -d -p 80:80 --name pulsedesk-ui groupd-ui:latest
+⸻
 
-Visit:
+🌍 Live Deployment — AWS EC2
 
-http://localhost
+PulseDesk AI is deployed using:
+	•	Amazon EC2 (Ubuntu)
+	•	Docker Engine
+	•	Automatically started with CI/CD
+	•	Hosted at:
 
+👉 http://23.23.72.235/
+
+Every deployment includes:
+	•	🚀 Build backend image
+	•	🚀 Build UI image
+	•	🔁 Stop old containers
+	•	♻️ Prune unused images
+
+No manual login needed.
+
+⸻
+
+🔄 CI/CD Pipeline (GitHub Actions)
+
+Every push to main triggers the pipeline:
+
+Set up job → Checkout → SSH Setup → Rsync to EC2 → Build images → Restart containers
+
+Secrets used:
+
+Name	Purpose
+EC2_HOST	Public IP of server
+EC2_USERNAME	Usually ubuntu
+EC2_SSH_KEY	Private key for SSH auth
+
+Pipeline file:
+.github/workflows/deploy.yml
 
 ⸻
 
 🧪 API Usage Example
 
+POST /predict
+
 curl -X POST "http://23.23.72.235:8000/predict" \
   -H "Content-Type: application/json" \
-  -d '{"text":"The app is not sending confirmation emails"}'
+  -d '{"text": "My account is not working"}'
+
+Sample response:
+
+{
+  "label": "Account",
+  "confidence": 0.74,
+  "all_probabilities": [0.74, 0.10, 0.08, 0.08]
+}
 
 
 ⸻
 
-📚 Technologies Used
+📁 Repository Structure
 
-Layer	Technology
-Model	DistilBERT (fine-tuned)
-Backend	FastAPI
-Frontend	HTML/JS/CSS
-Container	Docker
-Cloud	AWS EC2
-Versioning	Git & GitHub
-Deployment	Manual or CI/CD
+.
+├── app/
+│   ├── main.py
+│   ├── inference.py
+│   ├── utils.py
+│
+├── ui/
+│   ├── index.html
+│   └── static/
+│
+├── Dockerfile
+├── .dockerignore
+├── .gitignore
+├── README.md
+└── .github/workflows/deploy.yml
 
-
-⸻
-
-🚀 Future Improvements
-	•	GitHub Actions CI/CD pipeline
-	•	Email / Slack integration
-	•	Admin dashboard
-	•	Multi-label classification
-	•	Automatic knowledge-base suggestions
-	•	User authentication for teams
 
 ⸻
 
-👤 Author
+🛑 Note on Model Files
+
+The DistilBERT model folder (model/) is intentionally excluded using .gitignore to avoid pushing large files to GitHub.
+
+For deployment:
+	•	The model is already present on EC2.
+	•	Future updates will require updating the EC2 model manually or adding S3 storage.
+
+⸻
+
+🚀 Roadmap
+	•	✔ Auto ticket flagging
+	•	✔ Confidence scoring
+	•	⬜ Admin dashboard
+	•	⬜ Batch classification API
+	•	⬜ Add email → ticket ingestion
+	•	⬜ Add S3-hosted model versioning
+	•	⬜ Migrate UI to React
+
+⸻
+
+👨🏾‍💻 Author
 
 David Osei Kumi
-Cloud Engineer • AI/ML Developer
-GitHub: https://github.com/dkumi12
-LinkedIn: https://www.linkedin.com/in/david-osei-kumi/
-
-⸻
-
-🏁 Final Notes
-
-PulseDesk AI is a production-deployed prototype demonstrating:
-	•	Real-world ML model deployment
-	•	End-to-end infrastructure
-	•	Dockerized API + UI
-	•	Cloud hosting
-	•	Practical AI for business support systems
-
-
+AI/ML Engineer • Cloud Enthusiast • DevOps-in-Progress
+GitHub: https://github.com/dkumi12/
