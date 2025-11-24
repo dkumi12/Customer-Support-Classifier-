@@ -1,0 +1,53 @@
+name: PulseDesk AI CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Set up SSH for EC2 connection
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      # 3. Copy project files to EC2
+      - name: Copy files to EC2
+        run: |
+          rsync -avz --exclude "model" -e "ssh -o StrictHostKeyChecking=no" . ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/pulsedesk_ai/
+
+      # 4. Run deployment commands on EC2
+      - name: Deploy on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            cd ~/pulsedesk_ai
+
+            echo "Building Backend Image..."
+            docker build -t pulsedesk-api .
+
+            echo "Stopping old Backend container..."
+            docker stop pulsedesk-api || true
+            docker rm pulsedesk-api || true
+
+            echo "Starting Backend container..."
+            docker run -d -p 8000:8000 --name pulsedesk-api pulsedesk-api
+
+            echo "Starting UI container..."
+            docker stop pulsedesk-ui || true
+            docker rm pulsedesk-ui || true
+            docker run -d -p 80:80 --name pulsedesk-ui groupd-ui:latest
+
+            echo "Cleaning up old images..."
+            docker image prune -f
+
+            echo "Deployment completed successfully!"
+          EOF
