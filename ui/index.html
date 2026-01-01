@@ -3,129 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseDesk AI</title>
-
+    <title>PulseDesk AI - Customer Support Classifier</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        body { font-family: 'Manrope', sans-serif; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 
-<body class="bg-[#F7F9FC] text-gray-900">
+<body class="bg-[#F7F9FC] text-gray-900 min-h-screen flex flex-col">
 
 <!-- HEADER -->
-<header class="w-full bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold tracking-tight">PulseDesk AI</h1>
-    <div class="w-8 h-8 rounded-full bg-gray-300"></div>
+<header class="w-full bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+            P
+        </div>
+        <div>
+            <h1 class="text-xl font-bold tracking-tight">PulseDesk AI</h1>
+            <p class="text-xs text-gray-500">Intelligent Ticket Classification</p>
+        </div>
+    </div>
+    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-600">
+        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full">● Live</span>
+        <span>Powered by DistilBERT</span>
+    </div>
 </header>
 
-<!-- GRID -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+<!-- MAIN CONTENT -->
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 p-4 md:p-6">
 
     <!-- LEFT PANEL -->
-    <div class="lg:col-span-4 space-y-6">
+    <div class="lg:col-span-4 space-y-4 md:space-y-6">
 
         <!-- INPUT CARD -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+        <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-200">
             <h2 class="text-lg font-semibold mb-4">New Ticket</h2>
 
+            <!-- EMPTY STATE -->
+            <div id="emptyState" class="text-center py-8 text-gray-500">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                </svg>
+                <p class="text-sm font-medium mb-2">Try an example or enter your own message</p>
+                <p class="text-xs text-gray-400">AI will classify it instantly</p>
+            </div>
+
             <textarea id="inputText"
-                class="w-full h-40 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter customer message..."></textarea>
+                class="w-full h-32 md:h-40 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Describe the customer issue..."
+                oninput="hideEmptyState()"></textarea>
+
+            <!-- EXAMPLE PROMPTS -->
+            <div class="mt-4 space-y-2">
+                <p class="text-xs text-gray-600 font-medium">Quick Examples:</p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="useExample('My password reset link is not working')" 
+                        class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
+                        🔐 Password issue
+                    </button>
+                    <button onclick="useExample('I was charged twice for my subscription')" 
+                        class="text-xs px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition">
+                        💳 Billing problem
+                    </button>
+                    <button onclick="useExample('The app crashes when I click submit')" 
+                        class="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                        🐛 Technical bug
+                    </button>
+                </div>
+            </div>
 
             <button onclick="classifyTicket()"
-                class="w-full mt-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+                class="w-full mt-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition shadow-md hover:shadow-lg">
                 Classify Ticket
             </button>
 
             <div id="loading" class="hidden mt-4 text-center">
                 <div class="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto"></div>
-                <p class="text-gray-600 mt-2">Analyzing...</p>
+                <p class="text-gray-600 mt-2 text-sm">Analyzing with AI<span class="dots"></span></p>
             </div>
 
-            <div id="errorBox" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4">
-                <strong>Error: </strong><span id="errorMessage"></span>
+            <div id="errorBox" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mt-4">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <strong class="font-semibold">Error: </strong>
+                        <span id="errorMessage"></span>
+                        <p class="text-xs mt-1 text-red-600">Please try again or check your connection.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- MODEL OUTPUT CARD -->
-        <div id="resultCard" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-4">
+        <div id="resultCard" class="hidden bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-200 space-y-4">
 
             <div>
-                <h3 class="text-md font-semibold">Predicted Category</h3>
-                <p id="predCategory" class="text-2xl font-bold text-blue-600"></p>
+                <h3 class="text-sm font-semibold text-gray-600 mb-1">Predicted Category</h3>
+                <p id="predCategory" class="text-2xl md:text-3xl font-bold"></p>
             </div>
 
             <div>
-                <h3 class="text-md font-semibold">Confidence</h3>
-                <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
-                    <div id="confidenceBar" class="h-3 bg-green-500 rounded-full" style="width:0%"></div>
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">Confidence Level</h3>
+                <div class="w-full bg-gray-200 rounded-full h-4 mt-2 overflow-hidden">
+                    <div id="confidenceBar" class="h-4 rounded-full transition-all duration-500" style="width:0%"></div>
                 </div>
                 <p id="confidenceText" class="text-sm mt-1 font-medium"></p>
             </div>
 
             <div>
-                <h3 class="text-md font-semibold">Suggested Tags</h3>
-                <div id="tagBox" class="flex flex-wrap gap-2 mt-2"></div>
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">Suggested Tags</h3>
+                <div id="tagBox" class="flex flex-wrap gap-2"></div>
             </div>
 
             <div>
-                <h3 class="text-md font-semibold">Model Probabilities</h3>
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">Model Probabilities</h3>
                 <pre id="probOutput"
-                     class="bg-[#0F172A] text-green-300 p-4 rounded-xl text-xs whitespace-pre-wrap"></pre>
+                     class="bg-[#0F172A] text-green-300 p-3 md:p-4 rounded-xl text-xs whitespace-pre-wrap overflow-x-auto"></pre>
             </div>
 
         </div>
     </div>
 
     <!-- CENTER PANEL -->
-    <div class="lg:col-span-5 space-y-6">
+    <div class="lg:col-span-5 space-y-4 md:space-y-6">
 
         <!-- REASONING CARD -->
         <div id="analysisCard"
-             class="hidden bg-white p-6 rounded-2xl shadow-sm border-l-8 border-gray-300 border border-gray-200 space-y-4">
+             class="hidden bg-white p-4 md:p-6 rounded-2xl shadow-sm border-l-8 border-gray-300 border border-gray-200 space-y-4">
 
-            <h2 class="text-lg font-semibold">System Analysis</h2>
+            <h2 class="text-lg font-semibold flex items-center">
+                <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                System Analysis
+            </h2>
 
             <div>
-                <h3 class="font-semibold">Extracted Keywords</h3>
-                <p id="keywordExtract" class="text-gray-700 mt-1"></p>
+                <h3 class="font-semibold text-sm text-gray-700">Extracted Keywords</h3>
+                <p id="keywordExtract" class="text-gray-600 mt-1 text-sm"></p>
             </div>
 
             <div>
-                <h3 class="font-semibold">Risk Level</h3>
+                <h3 class="font-semibold text-sm text-gray-700">Risk Level</h3>
                 <div id="riskLevel" class="mt-2"></div>
             </div>
 
             <div>
-                <h3 class="font-semibold">System Flags</h3>
-                <div id="systemFlags" class="mt-2 text-gray-700"></div>
+                <h3 class="font-semibold text-sm text-gray-700">System Flags</h3>
+                <div id="systemFlags" class="mt-2 text-gray-600 text-sm"></div>
             </div>
 
             <div>
-                <h3 class="font-semibold">Recommended Action</h3>
-                <p id="recommendAction" class="text-gray-700 mt-1"></p>
+                <h3 class="font-semibold text-sm text-gray-700">Recommended Action</h3>
+                <p id="recommendAction" class="text-gray-600 mt-1 text-sm"></p>
             </div>
 
         </div>
     </div>
 
     <!-- RIGHT PANEL -->
-    <div class="lg:col-span-3 space-y-6">
+    <div class="lg:col-span-3 space-y-4 md:space-y-6">
 
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+        <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-200">
             <h2 class="text-lg font-semibold mb-4">Ticket History</h2>
 
             <button onclick="clearHistory()"
-                class="mb-4 w-full py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition">
+                class="mb-4 w-full py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition shadow-sm">
                 Clear History
             </button>
 
             <div id="historyList"
-                class="space-y-4 max-h-[70vh] overflow-y-auto scrollbar-hide">
+                class="space-y-3 max-h-[60vh] overflow-y-auto scrollbar-hide">
             </div>
         </div>
 
@@ -133,29 +185,76 @@
 
 </div>
 
+<!-- FOOTER -->
+<footer class="mt-auto bg-white border-t border-gray-200 py-4 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3 text-sm text-gray-600">
+        <div class="flex items-center gap-2">
+            <span class="font-semibold text-gray-900">Built by Group D</span>
+            <span class="text-gray-400">|</span>
+            <span>94% Accuracy</span>
+            <span class="text-gray-400">|</span>
+            <span class="text-xs">DistilBERT Model</span>
+        </div>
+        <div class="flex items-center gap-4 text-xs">
+            <a href="https://github.com/dkumi12/Customer-Support-Classifier-" target="_blank" 
+               class="hover:text-blue-600 transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub
+            </a>
+            <a href="https://huggingface.co/spaces/dkumi12/pulsedesk-ai" target="_blank" 
+               class="hover:text-blue-600 transition">
+                🤗 HuggingFace
+            </a>
+            <span class="text-gray-400">© 2026</span>
+        </div>
+    </div>
+</footer>
 
 <script>
     const API_URL = "https://dkumi12-pulsedesk-ai.hf.space/predict";
 
+    // Hide empty state when typing
+    function hideEmptyState() {
+        const text = document.getElementById("inputText").value.trim();
+        if (text) {
+            document.getElementById("emptyState").classList.add("hidden");
+        }
+    }
+
+    // Use example prompt
+    function useExample(text) {
+        document.getElementById("inputText").value = text;
+        hideEmptyState();
+    }
+
     function classifyTicket() {
         const text = document.getElementById("inputText").value.trim();
-        if (!text) { showError("Please enter a message."); return; }
+        if (!text) { 
+            showError("Please enter a message or try an example."); 
+            return; 
+        }
 
-        hideError(); showLoading();
+        hideError(); 
+        showLoading();
 
         fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error(`API returned ${res.status}`);
+            return res.json();
+        })
         .then(data => {
             hideLoading();
             displayResult(text, data);
         })
-        .catch(() => {
+        .catch(err => {
             hideLoading();
-            showError("Unable to contact API.");
+            showError(`Unable to contact API: ${err.message}`);
         });
     }
 
@@ -166,9 +265,31 @@
         document.getElementById("resultCard").classList.remove("hidden");
         document.getElementById("analysisCard").classList.remove("hidden");
 
-        document.getElementById("predCategory").textContent = category.toUpperCase();
+        // Category with color
+        const categoryEl = document.getElementById("predCategory");
+        categoryEl.textContent = category.toUpperCase();
+        
+        const categoryColors = {
+            account: "text-blue-600",
+            billing: "text-green-600",
+            technical: "text-red-600",
+            other: "text-yellow-600"
+        };
+        categoryEl.className = `text-2xl md:text-3xl font-bold ${categoryColors[category.toLowerCase()] || "text-gray-600"}`;
+
+        // Confidence bar with color
+        const confBar = document.getElementById("confidenceBar");
+        confBar.style.width = conf + "%";
+        
+        if (conf >= 70) {
+            confBar.className = "h-4 bg-green-500 rounded-full transition-all duration-500";
+        } else if (conf >= 40) {
+            confBar.className = "h-4 bg-yellow-500 rounded-full transition-all duration-500";
+        } else {
+            confBar.className = "h-4 bg-red-500 rounded-full transition-all duration-500";
+        }
+        
         document.getElementById("confidenceText").textContent = conf + "%";
-        document.getElementById("confidenceBar").style.width = conf + "%";
 
         // Tags
         const TAG_MAP = {
@@ -179,17 +300,15 @@
         };
         const tags = TAG_MAP[category.toLowerCase()] || ["#general"];
         document.getElementById("tagBox").innerHTML =
-            tags.map(t => `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-lg">${t}</span>`).join("");
+            tags.map(t => `<span class="bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">${t}</span>`).join("");
 
         document.getElementById("probOutput").textContent =
             JSON.stringify(data.all_probabilities, null, 2);
 
         runSystemAnalysis(text, category, conf);
-
         saveHistory(text, category, conf);
         loadHistory();
     }
-
 
     function runSystemAnalysis(text, category, confidence) {
         const keywords = text.split(/\s+/).slice(0, 6).join(", ");
@@ -209,7 +328,7 @@
             flag = "Low model confidence — manual review recommended.";
         }
 
-        switch (category) {
+        switch (category.toLowerCase()) {
             case "account":
                 recommendation = "Verify user identity and inspect access logs.";
                 break;
@@ -228,26 +347,25 @@
         if (risk === "Low") {
             analysisCard.style.borderLeftColor = "#10B981";
             document.getElementById("riskLevel").innerHTML =
-                `<span class="px-3 py-1 text-xs font-bold rounded-lg bg-green-100 text-green-700">LOW RISK</span>`;
+                `<span class="px-3 py-1.5 text-xs font-bold rounded-lg bg-green-100 text-green-700">✓ LOW RISK</span>`;
         }
         else if (risk === "Medium") {
             analysisCard.style.borderLeftColor = "#FACC15";
             document.getElementById("riskLevel").innerHTML =
-                `<span class="px-3 py-1 text-xs font-bold rounded-lg bg-yellow-100 text-yellow-700">MEDIUM RISK</span>`;
+                `<span class="px-3 py-1.5 text-xs font-bold rounded-lg bg-yellow-100 text-yellow-700">⚠ MEDIUM RISK</span>`;
         }
         else {
             analysisCard.style.borderLeftColor = "#EF4444";
             document.getElementById("riskLevel").innerHTML =
-                `<span class="px-3 py-1 text-xs font-bold rounded-lg bg-red-100 text-red-700">HIGH RISK</span>`;
+                `<span class="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-100 text-red-700">⚡ HIGH RISK</span>`;
         }
 
         document.getElementById("systemFlags").innerHTML =
-            flag !== "None" ? `<p class="mt-2 text-sm">${flag}</p>` :
-                              `<p class="text-sm text-gray-400">No flags detected.</p>`;
+            flag !== "None" ? `<p class="mt-1">${flag}</p>` :
+                              `<p class="text-gray-400">No flags detected.</p>`;
 
         document.getElementById("recommendAction").textContent = recommendation;
     }
-
 
     function saveHistory(text, category, confidence) {
         const history = JSON.parse(localStorage.getItem("history") || "[]");
@@ -255,15 +373,22 @@
             text, category, confidence,
             time: new Date().toLocaleTimeString()
         });
+        if (history.length > 20) history.pop(); // Keep last 20
         localStorage.setItem("history", JSON.stringify(history));
     }
 
     function loadHistory() {
         const history = JSON.parse(localStorage.getItem("history") || "[]");
+        if (history.length === 0) {
+            document.getElementById("historyList").innerHTML = 
+                '<p class="text-sm text-gray-400 text-center py-4">No history yet</p>';
+            return;
+        }
+        
         const html = history.map(item => `
-            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
-                <p class="text-sm font-semibold">${item.category.toUpperCase()} (${item.confidence}%)</p>
-                <p class="text-xs text-gray-600 mt-1">${item.text.substring(0, 60)}...</p>
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
+                <p class="text-sm font-semibold text-gray-900">${item.category.toUpperCase()} <span class="text-xs font-normal text-gray-500">(${item.confidence}%)</span></p>
+                <p class="text-xs text-gray-600 mt-1 line-clamp-2">${item.text}</p>
                 <p class="text-xs text-gray-400 mt-1">${item.time}</p>
             </div>
         `).join("");
@@ -271,19 +396,40 @@
     }
 
     function clearHistory() {
-        localStorage.removeItem("history");
-        loadHistory();
+        if (confirm("Clear all ticket history?")) {
+            localStorage.removeItem("history");
+            loadHistory();
+        }
     }
 
+    // Load history on page load
     loadHistory();
 
-    function showLoading() { document.getElementById("loading").classList.remove("hidden"); }
-    function hideLoading() { document.getElementById("loading").classList.add("hidden"); }
+    function showLoading() { 
+        document.getElementById("loading").classList.remove("hidden"); 
+    }
+    
+    function hideLoading() { 
+        document.getElementById("loading").classList.add("hidden"); 
+    }
+    
     function showError(msg) {
         document.getElementById("errorBox").classList.remove("hidden");
         document.getElementById("errorMessage").textContent = msg;
     }
-    function hideError() { document.getElementById("errorBox").classList.add("hidden"); }
+    
+    function hideError() { 
+        document.getElementById("errorBox").classList.add("hidden"); 
+    }
+
+    // Animate loading dots
+    setInterval(() => {
+        const dots = document.querySelector('.dots');
+        if (dots) {
+            const current = dots.textContent.length;
+            dots.textContent = '.'.repeat((current % 3) + 1);
+        }
+    }, 500);
 </script>
 
 </body>
