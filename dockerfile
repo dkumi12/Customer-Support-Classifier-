@@ -1,7 +1,7 @@
 # -------------------------------
 # Base Image
 # -------------------------------
-FROM python:3.10-slim
+FROM python:3.10
 
 # -------------------------------
 # Set Working Directory
@@ -12,24 +12,27 @@ WORKDIR /app
 # Install system dependencies
 # -------------------------------
 RUN apt-get update && apt-get install -y \
-    wget \
     unzip \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # -------------------------------
-# Copy Requirements First (for layer caching)
+# Install gdown for Google Drive downloads
+# -------------------------------
+RUN pip install --no-cache-dir gdown
+
+# -------------------------------
+# Copy Requirements
 # -------------------------------
 COPY requirements.txt .
 
 # -------------------------------
-# Install Python Dependencies
+# Install Dependencies
 # -------------------------------
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir gdown
+RUN pip install --no-cache-dir -r requirements.txt
 
 # -------------------------------
-# Copy Application Files ONLY
-# (No model download during build)
+# Copy Application Files
 # -------------------------------
 COPY app.py /app/app.py
 COPY download_model.sh /app/download_model.sh
@@ -41,12 +44,23 @@ RUN chmod +x /app/download_model.sh
 RUN mkdir -p /app/mlruns
 
 # -------------------------------
-# Expose API Port
+# Environment Variables
 # -------------------------------
-EXPOSE 8000
+ENV PORT=7860
+
+# -------------------------------
+# Expose API Port (HF Spaces uses 7860 by default)
+# -------------------------------
+EXPOSE 7860
+
+# -------------------------------
+# Healthcheck
+# -------------------------------
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:7860/health || exit 1
 
 # -------------------------------
 # Run Application
-# Download model at RUNTIME (not build time), then start server
+# Download model at startup, then start server
 # -------------------------------
-CMD ["/bin/bash", "-c", "/app/download_model.sh && uvicorn app:app --host 0.0.0.0 --port 8000"]
+CMD ["/bin/bash", "-c", "/app/download_model.sh && uvicorn app:app --host 0.0.0.0 --port 7860"]
