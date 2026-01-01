@@ -147,13 +147,51 @@ Sample response:
 
 ⸻
 
-🛑 Note on Model Files
+🛑 Model Files & Deployment
 
-The DistilBERT model folder (model/) is intentionally excluded using .gitignore to avoid pushing large files to GitHub.
+The DistilBERT model is **automatically downloaded from Google Drive** during container startup.
 
-For deployment:
-	•	The model is already present on EC2.
-	•	Future updates will require updating the EC2 model manually or adding S3 storage.
+### For Local Development:
+
+**Option 1: Let Docker handle it (Recommended)**
+```bash
+docker build -t pulsedesk-api .
+docker run -p 8000:8000 pulsedesk-api
+```
+The container will automatically download the model on first run.
+
+**Option 2: Manual download**
+```bash
+# Install gdown
+pip install gdown
+
+# Download model
+gdown 1t-X6C2vL94D-m4e2Thd2HDclcbaPLN47 --fuzzy -O model.zip
+unzip model.zip
+rm model.zip
+```
+
+### For Production Deployment:
+
+The model is automatically downloaded during deployment via the `download_model.sh` script.
+
+**GitHub Secrets Required:**
+- `EC2_HOST` - Public IP of your server
+- `EC2_USERNAME` - Usually `ubuntu`
+- `EC2_SSH_KEY` - Private SSH key for authentication
+- `GDRIVE_FILE_ID` - Google Drive file ID (default: `1t-X6C2vL94D-m4e2Thd2HDclcbaPLN47`)
+
+### Deploying to Other Platforms:
+
+This setup works on **any** platform that supports Docker:
+- ✅ AWS ECS/Fargate, Lambda (via container)
+- ✅ Google Cloud Run
+- ✅ Azure Container Instances
+- ✅ Railway, Render, Fly.io
+- ✅ DigitalOcean App Platform
+- ✅ Heroku Container Registry
+
+Simply set the `GDRIVE_FILE_ID` environment variable during deployment.
 
 ⸻
 

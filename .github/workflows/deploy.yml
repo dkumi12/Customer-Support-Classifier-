@@ -38,13 +38,17 @@ jobs:
             docker stop pulsedesk-api || true
             docker rm pulsedesk-api || true
 
-            echo "▶️ Starting Backend container..."
-            docker run -d -p 8000:8000 --name pulsedesk-api pulsedesk-api
+            echo "▶️ Starting Backend container with Google Drive model download..."
+            docker run -d -p 8000:8000 \
+              --name pulsedesk-api \
+              -e GDRIVE_FILE_ID="${{ secrets.GDRIVE_FILE_ID }}" \
+              pulsedesk-api
 
-            echo "🎨 Starting UI container..."
+            echo "🎨 Building and starting UI container..."
+            docker build -t pulsedesk-ui ./ui
             docker stop pulsedesk-ui || true
             docker rm pulsedesk-ui || true
-            docker run -d -p 80:80 --name pulsedesk-ui groupd-ui:latest
+            docker run -d -p 80:80 --name pulsedesk-ui pulsedesk-ui
 
             echo "🧹 Cleaning old images..."
             docker image prune -f
