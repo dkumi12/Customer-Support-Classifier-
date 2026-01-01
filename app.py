@@ -3,12 +3,20 @@ import torch
 import mlflow
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from prometheus_client import Counter, Histogram, generate_latest
-from fastapi.responses import PlainTextResponse
+import os
 
 app = FastAPI(title="Group D Support Ticket Classifier API")
+
+# -----------------------------
+# SERVE STATIC FILES (UI)
+# -----------------------------
+if os.path.exists("/app/static"):
+    app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 
 # -----------------------------
 # CORS
@@ -56,6 +64,15 @@ label_map = ["account", "billing", "other", "technical"]
 # -----------------------------
 class RequestText(BaseModel):
     text: str
+
+# -----------------------------
+# ROOT - SERVE UI
+# -----------------------------
+@app.get("/", response_class=HTMLResponse)
+def serve_ui():
+    REQUEST_COUNT.labels(endpoint="/").inc()
+    with open("/app/static/index.html", "r") as f:
+        return f.read()
 
 # -----------------------------
 # HEALTH

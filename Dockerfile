@@ -37,6 +37,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py /app/app.py
 COPY download_model.sh /app/download_model.sh
 
+# Copy UI files
+COPY ui/index.html /app/static/index.html
+
 # Make download script executable
 RUN chmod +x /app/download_model.sh
 
