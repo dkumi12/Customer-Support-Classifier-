@@ -1,213 +1,96 @@
-🚀 PulseDesk AI — Customer Support Ticket Classifier
+---
+title: PulseDesk AI - Customer Support Classifier
+emoji: 🎫
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+license: mit
+app_port: 8000
+---
 
-PulseDesk AI is a lightweight, production-ready machine-learning customer support classifier designed to automatically categorize incoming support messages into predefined ticket types.
+# 🎫 PulseDesk AI - Customer Support Ticket Classifier
 
-It features:
-	•	🔥 DistilBERT-based classifier (fine-tuned)
-	•	🌐 Modern responsive UI
-	•	🐳 Dockerized backend + frontend
-	•	☁️ Live deployment on AWS EC2
-	•	🔄 Fully automated CI/CD with GitHub Actions
-	•	⚡ 1-click deploys on every push to main
-	•	📈 Real-time prediction confidence
-	•	🗂️ Ticket history + clearing
+Automatically classify customer support messages into categories using fine-tuned DistilBERT achieving **94% accuracy**.
 
-Live Demo
-👉 http://23.23.72.235/
+## 🔥 Features
 
-⸻
+- **DistilBERT-based classification** - State-of-the-art transformer model
+- **Real-time predictions** - Fast inference with confidence scores
+- **4 Ticket Categories**: Account, Billing, Technical, Other
+- **FastAPI backend** - Modern async API with automatic documentation
+- **Production-ready** - Docker deployment with MLflow tracking
 
-🧠 How PulseDesk AI Works
-	1.	User enters a customer message.
-	2.	The backend (/predict) loads the DistilBERT model and predicts:
-	•	Category (e.g., Account, Technical, Payments, etc.)
-	•	Confidence score
-	•	Raw probability distribution
-	3.	The UI displays the result + adds it to ticket history.
-	4.	You can clear history instantly.
+## 🚀 API Usage
 
-⸻
+### Health Check
+```bash
+curl https://dkumi12-pulsedesk-ai.hf.space/health
+```
 
-🏗️ Project Architecture
-
-PulseDesk AI
-│
-├── Backend API  (FastAPI + DistilBERT)
-│     ├── Dockerfile
-│     ├── app/
-│     │    ├── main.py
-│     │    └── model loader + classifier
-│     └── model/ (ignored in repo)
-│
-├── Frontend UI (HTML/CSS/JS)
-│     ├── index.html
-│     ├── Dockerfile
-│     └── assets/
-│
-├── CI/CD (GitHub Actions)
-│     └── deploy.yml
-│
-└── AWS EC2 Deployment
-      ├── Backend → port 8000
-      └── UI → port 80
-
-
-⸻
-
-🐳 Running Locally (Docker)
-
-1. Build API
-
-docker build -t pulsedesk-api .
-docker run -p 8000:8000 pulsedesk-api
-
-2. Build UI
-
-docker build -t pulsedesk-ui ./ui
-docker run -p 80:80 pulsedesk-ui
-
-
-⸻
-
-🌍 Live Deployment — AWS EC2
-
-PulseDesk AI is deployed using:
-	•	Amazon EC2 (Ubuntu)
-	•	Docker Engine
-	•	Automatically started with CI/CD
-	•	Hosted at:
-
-👉 http://23.23.72.235/
-
-Every deployment includes:
-	•	🚀 Build backend image
-	•	🚀 Build UI image
-	•	🔁 Stop old containers
-	•	♻️ Prune unused images
-
-No manual login needed.
-
-⸻
-
-🔄 CI/CD Pipeline (GitHub Actions)
-
-Every push to main triggers the pipeline:
-
-Set up job → Checkout → SSH Setup → Rsync to EC2 → Build images → Restart containers
-
-Secrets used:
-
-Name	Purpose
-EC2_HOST	Public IP of server
-EC2_USERNAME	Usually ubuntu
-EC2_SSH_KEY	Private key for SSH auth
-
-Pipeline file:
-.github/workflows/deploy.yml
-
-⸻
-
-🧪 API Usage Example
-
-POST /predict
-
-curl -X POST "http://23.23.72.235:8000/predict" \
+### Classify Support Ticket
+```bash
+curl -X POST "https://dkumi12-pulsedesk-ai.hf.space/predict" \
   -H "Content-Type: application/json" \
-  -d '{"text": "My account is not working"}'
+  -d '{"text": "My account is locked and I cannot login"}'
+```
 
-Sample response:
-
+### Response Format
+```json
 {
-  "label": "Account",
-  "confidence": 0.74,
-  "all_probabilities": [0.74, 0.10, 0.08, 0.08]
+  "label": "account",
+  "confidence": 0.94,
+  "all_probabilities": {
+    "account": 0.94,
+    "billing": 0.03,
+    "technical": 0.02,
+    "other": 0.01
+  },
+  "latency": 0.023
 }
-
-
-⸻
-
-📁 Repository Structure
-
-.
-├── app/
-│   ├── main.py
-│   ├── inference.py
-│   ├── utils.py
-│
-├── ui/
-│   ├── index.html
-│   └── static/
-│
-├── Dockerfile
-├── .dockerignore
-├── .gitignore
-├── README.md
-└── .github/workflows/deploy.yml
-
-
-⸻
-
-🛑 Model Files & Deployment
-
-The DistilBERT model is **automatically downloaded from Google Drive** during container startup.
-
-### For Local Development:
-
-**Option 1: Let Docker handle it (Recommended)**
-```bash
-docker build -t pulsedesk-api .
-docker run -p 8000:8000 pulsedesk-api
-```
-The container will automatically download the model on first run.
-
-**Option 2: Manual download**
-```bash
-# Install gdown
-pip install gdown
-
-# Download model
-gdown 1t-X6C2vL94D-m4e2Thd2HDclcbaPLN47 --fuzzy -O model.zip
-unzip model.zip
-rm model.zip
 ```
 
-### For Production Deployment:
+## 🎯 Model Details
 
-The model is automatically downloaded during deployment via the `download_model.sh` script.
+- **Architecture**: DistilBERT (distilbert-base-uncased)
+- **Task**: Multi-class text classification
+- **Accuracy**: 94%
+- **Categories**: 4 (Account, Billing, Technical, Other)
+- **Training**: Fine-tuned on customer support ticket dataset
+- **Inference**: CPU-optimized for fast real-time classification
 
-**GitHub Secrets Required:**
-- `EC2_HOST` - Public IP of your server
-- `EC2_USERNAME` - Usually `ubuntu`
-- `EC2_SSH_KEY` - Private SSH key for authentication
-- `GDRIVE_FILE_ID` - Google Drive file ID (default: `1t-X6C2vL94D-m4e2Thd2HDclcbaPLN47`)
+## 📊 Use Cases
 
-### Deploying to Other Platforms:
+- **Customer Support Automation** - Route tickets to appropriate teams
+- **Priority Classification** - Identify urgent vs routine requests
+- **Analytics Dashboard** - Analyze support trends by category
+- **Chatbot Integration** - Enhance AI assistants with context awareness
 
-This setup works on **any** platform that supports Docker:
-- ✅ AWS ECS/Fargate, Lambda (via container)
-- ✅ Google Cloud Run
-- ✅ Azure Container Instances
-- ✅ Railway, Render, Fly.io
-- ✅ DigitalOcean App Platform
-- ✅ Heroku Container Registry
+## 🛠️ Tech Stack
 
-Simply set the `GDRIVE_FILE_ID` environment variable during deployment.
+- **Model**: DistilBERT (Hugging Face Transformers)
+- **Backend**: FastAPI
+- **Monitoring**: Prometheus + MLflow
+- **Container**: Docker
+- **Deployment**: Hugging Face Spaces
 
-⸻
+## 🔗 Links
 
-🚀 Roadmap
-	•	✔ Auto ticket flagging
-	•	✔ Confidence scoring
-	•	⬜ Admin dashboard
-	•	⬜ Batch classification API
-	•	⬜ Add email → ticket ingestion
-	•	⬜ Add S3-hosted model versioning
-	•	⬜ Migrate UI to React
+- **GitHub Repository**: [Customer-Support-Classifier](https://github.com/dkumi12/Customer-Support-Classifier-)
+- **API Documentation**: `/docs` endpoint (FastAPI auto-generated)
+- **Metrics Endpoint**: `/metrics` (Prometheus format)
 
-⸻
+## 👨🏾‍💻 Author
 
-👨🏾‍💻 Author
+**David Osei Kumi**  
+AI/ML Engineer | Cloud & DevOps Enthusiast  
+- GitHub: [@dkumi12](https://github.com/dkumi12)
+- LinkedIn: [David Osei Kumi](https://linkedin.com/in/your-linkedin)
 
-David Osei Kumi
-AI/ML Engineer • Cloud Enthusiast • DevOps-in-Progress
-GitHub: https://github.com/dkumi12/
+## 📝 License
+
+MIT License - See LICENSE file for details
+
+---
+
+Built with ❤️ using Hugging Face Spaces
