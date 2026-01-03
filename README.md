@@ -4,10 +4,13 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
+[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Live%20Demo-yellow)](https://huggingface.co/spaces/dkumi12/pulsedesk-ai)
 
 > **Production-grade ML system for automated customer support ticket classification using fine-tuned DistilBERT achieving 94% accuracy**
 
-Led end-to-end development and deployment as **Project Captain at Thrive Africa**, managing a team of 40+ interns while personally owning the complete CI/CD pipeline and production infrastructure.
+Led end-to-end development and deployment as **Project Captain at Thrive Africa**, managing a team of 40+ interns while personally owning the complete CI/CD pipeline and multi-cloud production infrastructure.
+
+## 🚀 **[Try Live Demo on Hugging Face →](https://huggingface.co/spaces/dkumi12/pulsedesk-ai)**
 
 ---
 
@@ -37,9 +40,20 @@ PulseDesk AI is an intelligent customer support ticket classification system tha
 
 - **⚡ 94% Classification Accuracy** - Reliable automated ticket routing
 - **🚀 <50ms Inference Time** - Real-time predictions for immediate routing
+- **☁️ Multi-Cloud Deployment** - Production on AWS EC2 + Public demo on Hugging Face Spaces
 - **📊 Prometheus Integration** - Full observability for production monitoring
-- **🔄 Automated Deployment** - Zero-downtime deployments via GitHub Actions
-- **🐳 Docker-First Architecture** - Consistent environments from dev to production
+- **🔄 Automated CI/CD** - Zero-downtime deployments via GitHub Actions to both platforms
+- **🐳 Docker-First Architecture** - Consistent containerized environments across clouds
+
+### 🌐 Live Demos & Deployments
+
+| Platform | Purpose | Link | Status |
+|----------|---------|------|--------|
+| **🤗 Hugging Face Spaces** | Public Interactive Demo | **[Try Now →](https://huggingface.co/spaces/dkumi12/pulsedesk-ai)** | ✅ Live |
+| **☁️ AWS EC2** | Production API | Contact for access | ✅ Live |
+| **📖 GitHub** | Source Code & Documentation | [Repository](https://github.com/dkumi12/Customer-Support-Classifier-) | ✅ Public |
+
+> **👉 Test the classifier instantly:** Visit the [Hugging Face demo](https://huggingface.co/spaces/dkumi12/pulsedesk-ai) to classify support tickets in real-time!
 
 ---
 
@@ -58,7 +72,11 @@ PulseDesk AI is an intelligent customer support ticket classification system tha
 - **Health check endpoints** for load balancer integration
 
 ### DevOps & Monitoring
-- **GitHub Actions CI/CD** pipeline for automated deployments
+- **GitHub Actions CI/CD** pipeline for automated deployments to AWS and Hugging Face
+- **Docker containerization** for consistent environments across platforms
+- **Multi-cloud deployment** - AWS EC2 (production) + Hugging Face Spaces (public demo)
+- **Prometheus metrics** for real-time monitoring
+- **AWS EC2 deployment** with automated rollback capability
 - **Docker containerization** for consistent environments
 - **Prometheus metrics** for real-time monitoring
 - **AWS EC2 deployment** with automated rollback capability
@@ -79,26 +97,32 @@ PulseDesk AI is an intelligent customer support ticket classification system tha
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐
-│ GitHub Actions  │ ◄── Automated CI/CD Pipeline
-│   Workflow      │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────────────┐
-│         AWS EC2 Instance            │
-│  ┌──────────────┐  ┌─────────────┐ │
-│  │   Backend    │  │     UI      │ │
-│  │   (Docker)   │  │  (Docker)   │ │
-│  │   Port 8000  │  │  Port 80    │ │
-│  └──────┬───────┘  └──────┬──────┘ │
-│         │                 │         │
-│         ▼                 ▼         │
-│  ┌────────────────────────────┐    │
-│  │   DistilBERT Model        │    │
-│  │   + Prometheus Metrics     │    │
-│  └────────────────────────────┘    │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│              GitHub Actions CI/CD Pipeline              │
+│         (Automated Build, Test & Deploy)                │
+└─────────┬───────────────────────────────────────┬───────┘
+          │                                       │
+          │                                       │
+          ▼                                       ▼
+┌─────────────────────────────┐    ┌────────────────────────────┐
+│    AWS EC2 (Production)     │    │   Hugging Face Spaces      │
+│                             │    │      (Public Demo)         │
+│  ┌─────────┐  ┌──────────┐ │    │  ┌──────────────────────┐  │
+│  │ Backend │  │    UI    │ │    │  │  Integrated App      │  │
+│  │ Docker  │  │  Docker  │ │    │  │  (API + UI)          │  │
+│  │Port 8000│  │  Port 80 │ │    │  │  Port 7860           │  │
+│  └────┬────┘  └─────┬────┘ │    │  └──────────┬───────────┘  │
+│       │             │       │    │             │               │
+│       └──────┬──────┘       │    │             ▼               │
+│              ▼              │    │  ┌──────────────────────┐  │
+│  ┌──────────────────────┐  │    │  │   DistilBERT Model   │  │
+│  │  DistilBERT Model    │  │    │  │  + FastAPI Backend   │  │
+│  │  + Prometheus        │  │    │  └──────────────────────┘  │
+│  └──────────────────────┘  │    │                             │
+└─────────────────────────────┘    └────────────────────────────┘
+        Production API                  🌐 Try Live Demo:
+    (Enterprise Clients)           huggingface.co/spaces/dkumi12/
+                                         pulsedesk-ai
 ```
 
 ### Data Flow
